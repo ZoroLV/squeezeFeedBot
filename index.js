@@ -1,7 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
-const { token } = require('./config.json');
+require("dotenv").config();
 const helpers = require('./misc/helpers')
 
 // Create a new client instance
@@ -56,5 +56,5 @@ client.on('ready', () => {
 	setInterval(postScores, 300000);
 });
 
-client.login(token);
+client.login(process.env.DISCORD_TOKEN);
 
