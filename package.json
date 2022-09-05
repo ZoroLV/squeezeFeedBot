@@ -1,0 +1,35 @@
+{
+  "name": "bs-replay-analyzer-bot",
+  "version": "1.0.0",
+  "description": "Beat Saber Replay Analyzer Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/recursivebs/bs-replay-analyzer-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/recursivebs/bs-replay-analyzer-bot/issues"
+  },
+  "homepage": "https://github.com/recursivebs/bs-replay-analyzer-bot#readme",
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "@kurkle/color": "^0.1.9",
+    "chart.js": "^3.7.1",
+    "chartjs-node-canvas": "^4.1.6",
+    "discord-api-types": "^0.30.0",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "group-by": "^0.0.1",
+    "jszip": "^3.10.0",
+    "moment": "^2.29.1",
+    "moving-averages": "^4.0.6",
+    "node-fetch": "^2.6.7"
+  }
+}
