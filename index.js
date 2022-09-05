@@ -52,9 +52,12 @@ async function postScores(){
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 	console.log('Score feed started');
+	client.user.setPresence({ activities: [{ name: 'with discord.js' }], status: 'idle' });
+
+
 	client.user.setPresence({
 		status: 'dnd',
-		activity: {
+		activities: {
 			name: 'you squeeze',
 			type: 'WATCHING'
 		}
