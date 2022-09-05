@@ -1,2 +1,2 @@
-# bs-replay-analyzer-bot
-Beat Saber Replay Analyzer Bot
+# Squeeze Feed Bot
+Squeezer discord score feed
