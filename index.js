@@ -8,7 +8,7 @@ const helpers = require('./misc/helpers')
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
 async function postScores(){
-	const userIDs = ["76561197999207881", "76561198126686400", "76561198071688400"]
+	const userIDs = ["76561197999207881", "76561198126686400", "76561198071688400", "76561198048499373"]
 	// Get the current time
 	let currentTime = new Date().getTime()
 	// Loop through each user
