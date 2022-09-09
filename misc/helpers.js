@@ -1,6 +1,60 @@
 const fetch = require('node-fetch');
 const helpers = require('../misc/helpers')
+const { Client } = require('pg')
 
+
+// Function inserts player's data, check if player id exists in database, if so update, if not insert
+const insertUser = async (id, name, pp) => {
+    const con = new Client({
+        host: process.env.PGHOST,
+        user: process.env.PGUSER,
+        database: process.env.PGDATABASE,
+        password: process.env.PGPASSWORD,
+        port: process.env.PGPORT,
+    });
+    try {
+        await con.connect();           // gets connection
+        const res = await con.query(`SELECT * FROM player_info WHERE id = '${id}'`);
+        if (res.rows.length > 0) {
+            await con.query(`UPDATE player_info SET name = '${name}', pp = ${pp} WHERE id = '${id}'`);
+            return true;
+        } else {
+            await con.query(`INSERT INTO player_info (id, name, pp) VALUES ('${id}', '${name}', ${pp})`);
+            return true;
+        }
+    } catch (err) {
+        console.log(err.stack);
+        return false;
+    } finally {
+        await con.end();
+    }
+}
+
+const getPlayerInfoDB = async (id) => {
+    const con = new Client({
+        host: process.env.PGHOST,
+        user: process.env.PGUSER,
+        database: process.env.PGDATABASE,
+        password: process.env.PGPASSWORD,
+        port: process.env.PGPORT,
+    });
+    try {
+        await con.connect();           // gets connection
+        const res = await con.query(`SELECT * FROM player_info WHERE id = '${id}'`);
+        if (res.rows.length > 0) {
+            return res.rows[0];
+        } else {
+            const player = await helpers.getPlayerInfo(id);
+            await insertUser(id, player.name, player.pp);
+            return false;
+        }
+    } catch (err) {
+        console.log(err.stack);
+        return false;
+    } finally {
+        await con.end();
+    }
+}
 
 async function getMapHashFromLeaderboardId(leaderboardId) {
     const url = `https://scoresaber.com/api/leaderboard/by-id/${leaderboardId}/info`
@@ -187,6 +241,7 @@ const getRecentScores = async (playerId) => {
     return data
 }
 
+// Check if the scoreId exists on the top scores of the player and make sure ranked is true
 const isTopPlay = async (playerId, scoreId) => {
     let topScoreIds = []
     const url = `https://scoresaber.com/api/player/${playerId}/scores?limit=80&sort=top`
@@ -206,3 +261,5 @@ exports.getMaxScore = getMaxScore
 exports.calculatePercentage = calculatePercentage
 exports.getPlayerInfo = getPlayerInfo
 exports.getScoresaberLeaderboardData = getScoresaberLeaderboardData
+exports.insertUser = insertUser
+exports.getPlayerInfoDB = getPlayerInfoDB
