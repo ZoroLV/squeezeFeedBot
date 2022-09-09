@@ -64,8 +64,8 @@ async function postScores(){
 					}
 				}
 			}
-			// If the ppDiff is greater than 0 then post it to the discord channel
-		if (ppDiff > 0) {
+			// If the ppDiff is greater than 1 then post it to the discord channel
+		if (ppDiff > 1) {
 			const embed = new MessageEmbed()
 			.setColor('#C3B1E1')
 			.setTitle(`${playerInfo.name} +${ppDiff.toFixed(2)}pp`)

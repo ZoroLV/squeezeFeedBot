@@ -46,7 +46,7 @@ const getPlayerInfoDB = async (id) => {
         } else {
             const player = await helpers.getPlayerInfo(id);
             await insertUser(id, player.name, player.pp);
-            return false;
+            return player;
         }
     } catch (err) {
         console.log(err.stack);
