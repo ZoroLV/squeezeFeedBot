@@ -56,7 +56,7 @@ async function postScores(){
 							}
 						}
 						else{
-							console.log(recentScores[j].leaderboard.name + " is not a top play")
+							console.log(recentScores[j].leaderboard.songName + " is not a top play")
 						}
 					}
 					else{
