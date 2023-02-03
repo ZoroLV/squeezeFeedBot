@@ -11,7 +11,7 @@ async function postScores(){
 	const userIDs = ["76561197999207881", "76561198126686400", "76561198071688400", "76561198048499373"]
 	// Get the current time
 	let currentTime = new Date().getTime()
-	const channel = await client.channels.fetch('701025900132565002')
+	const channel = await client.channels.fetch('1016245806078099516')
 	// Loop through each user
 	for (let i = 0; i < userIDs.length; i++) {
 		// Check each user's recent scores and see if they are within the last 10 minutes, await all the data and store it in an array
