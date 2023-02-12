@@ -40,7 +40,8 @@ function connect() {
 			let jsonObj = JSON.parse(event.data);
 
 			  if (jsonObj.commandName === "score" && userIDs.includes(jsonObj.commandData.score.leaderboardPlayerInfo.id && jsonObj.commandData.leaderboard.ranked === true)) {
-
+				console.log("New message")			
+				  
 				let oldInfo = await helpers.getPlayerInfoDB(jsonObj.commandData.score.leaderboardPlayerInfo.id);
 				let newInfo = await helpers.getPlayerInfo(jsonObj.commandData.score.leaderboardPlayerInfo.id);
 				let ppDiff = newInfo.pp - oldInfo.pp;
