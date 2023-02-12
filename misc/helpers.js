@@ -241,14 +241,14 @@ const getRecentScores = async (playerId) => {
     return data
 }
 
-// Check if the scoreId exists on the top scores of the player and make sure ranked is true
-const isTopPlay = async (playerId, scoreId) => {
-    let topScoreIds = []
-    const url = `https://scoresaber.com/api/player/${playerId}/scores?limit=80&sort=top`
+// Check if the pp is higher than the last score's pp on the page
+const isTopPlay = async (playerId, pp) => {
+    const url = `https://scoresaber.com/api/player/${playerId}/scores?sort=top&page=10`
     const response = await fetch(url)
     const data = await response.json()
-    topScoreIds = data["playerScores"].map(x => x.score.id)
-    return topScoreIds.includes(scoreId)
+    const lastScore = data["playerScores"].slice(-1)[0]
+    const lastScorePP = lastScore.pp
+    return pp > lastScorePP
 }
 
 exports.isTopPlay = isTopPlay
