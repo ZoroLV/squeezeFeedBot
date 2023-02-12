@@ -241,14 +241,14 @@ const getRecentScores = async (playerId) => {
     return data
 }
 
-// Check if the pp is higher than the last score's pp on the page
+// Check if the pp is higher or equal than the last score's pp on the page
 const isTopPlay = async (playerId, pp) => {
     const url = `https://scoresaber.com/api/player/${playerId}/scores?sort=top&page=10`
     const response = await fetch(url)
     const data = await response.json()
     const lastScore = data["playerScores"].slice(-1)[0]
     const lastScorePP = lastScore.pp
-    return pp > lastScorePP
+    return pp >= lastScorePP
 }
 
 exports.isTopPlay = isTopPlay
