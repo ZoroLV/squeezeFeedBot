@@ -248,7 +248,7 @@ const isTopPlay = async (playerId, pp) => {
     const data = await response.json()
     const lastScore = data["playerScores"].slice(-1)[0]
     const lastScorePP = lastScore.pp
-    return pp >= lastScorePP
+    return pp <= lastScorePP
 }
 
 exports.isTopPlay = isTopPlay
