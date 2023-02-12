@@ -38,7 +38,6 @@ function connect() {
 		// If the player is in the list of users
 		if (event.data !== "Connected to the ScoreSaber WSS") {
 			let jsonObj = JSON.parse(event.data);
-			console.log(
 
 			  if (jsonObj.commandName === "score" && userIDs.includes(jsonObj.commandData.score.leaderboardPlayerInfo.id) && jsonObj.commandData.leaderboard.ranked === true) {
 				console.log("New message")			
