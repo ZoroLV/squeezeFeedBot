@@ -56,7 +56,7 @@ function connect() {
 				let percentage = helpers.calculatePercentage(scoreData.modifiedScore, songData.maxScore);
 
 				if (topPlay) {
-
+					console.log("New top play")
 					// pp Gain embed
 					const embed = new MessageEmbed()
 						.setColor('#C3B1E1')
