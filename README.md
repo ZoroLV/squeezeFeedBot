@@ -1,2 +1,2 @@
 # Squeeze Feed Bot
-Discord bot for displaying scores from selected humans
+Discord bot for displaying scores from selected beings
