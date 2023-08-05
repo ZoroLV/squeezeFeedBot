@@ -1,2 +1,4 @@
 # Squeeze Feed Bot
-Squeezer discord score feed
+Discord bot for displaying scores from selected beings
+
+Currently being ran on railway
