@@ -1,6 +1,6 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
-const { Client, Collection, Intents, MessageEmbed } = require('discord.js');
+const { Client, Collection, Intents, MessageEmbed, MessageAttachment } = require('discord.js');
 require("dotenv").config();
 const helpers = require('./misc/helpers');
 const WebSocket = require('ws');
@@ -79,10 +79,126 @@ function connect() {
 		}
 	}
 
+
 	SSSock.onclose = function() {
 		console.log("Disconnected from ScoreSaber");
 		setTimeout(connect, 5000);
 	}
+
+	// Slash command to ping
+	client.on('interactionCreate', async interaction => {
+		if (!interaction.isCommand()) return;
+
+		if (interaction.commandName === 'ping') {
+			await interaction.reply('Pong!');
+		}
+	}
+	);
+
+	// Slash command to get deatailed server info
+	client.on('interactionCreate', async interaction => {
+		if (!interaction.isCommand()) return;
+
+		if (interaction.commandName === 'server') {
+			await interaction.reply(`Server name: ${interaction.guild.name}\nTotal members: ${interaction.guild.memberCount}`);
+		}
+	}
+	);
+
+	// Slash command to get deatailed user info
+	client.on('interactionCreate', async interaction => {
+		if (!interaction.isCommand()) return;
+
+		if (interaction.commandName === 'user') {
+			await interaction.reply(`Your tag: ${interaction.user.tag}\nYour id: ${interaction.user.id}`);
+		}
+	}
+	);
+
+	// Slash command to get amount of maps FC'd by star rating
+	client.on('interactionCreate', async interaction => {
+		if (!interaction.isCommand()) return;
+
+		if (interaction.commandName === 'fc') {
+			let star = interaction.options.getInteger('star');
+			let id = interaction.options.getString('id');
+
+			// Error handling for options 
+			if (star < 0 || star > 12) {
+				await interaction.reply('Star rating must be between 0 and 14!');
+				return;
+			}
+
+			//let bMakePlaylist = interaction.options.getBoolean('playlist');
+			let info = await helpers.getPlayerInfo(id);
+
+			if (info === null) {
+				await interaction.reply('Invalid ID!');
+				return;
+			}
+			
+			interaction.deferReply();
+			let rankedScores = await helpers.getAllRankedScores(id);
+			console.log(rankedScores.length);
+			let fcCount = 0;
+
+				for (let i = 0; i < rankedScores.length; i++) {
+
+					if (rankedScores[i].score.fullCombo === true && rankedScores[i].leaderboard.stars >= star && rankedScores[i].leaderboard.stars < star + 1) {
+						fcCount++;
+					}
+				}
+
+			
+			// Get the total number of ranked maps at that star range so we can see how many maps the player has FC'd
+			let totalMaps = await helpers.getTotalRankedMaps(star);
+
+			let messageString = `**${info.name}** has **${fcCount}**/**${totalMaps}** maps FC'd at **${star}**⭐!`;
+
+			/* If the user wants a playlist, make one of all the missing FCs
+			if (bMakePlaylist) {
+				const playlistTitle = `${info.name} - ${fcCount} FCs at ${star} star`;
+				// For the filename, separate the words with underscores, and add the date at the end
+				const playlistFileName = `${info.name}_MissingFCs_at_${star}_star_${new Date().toISOString().slice(0, 10)}.bplist`;
+			
+				let playlistData = {
+					playlistTitle: playlistTitle,
+					playlistAuthor: info.name,
+					songs: []
+				};
+
+				// Iterate through all of the maps at the given star range then compare the ids to the ids of the maps the player has FC'd and add the missing ones to the playlist
+				for (let i = 0; i < rankedScores.length; i++) {
+					if (rankedScores[i].score.fullCombo === false && rankedScores[i].leaderboard.stars >= star && rankedScores[i].leaderboard.stars < star + 1) {
+						let songData = await helpers.getBeatSaverMapDataByHash(rankedScores[i].leaderboard.songHash);
+						let song = {
+							songName: songData.metadata.songName,
+							levelAuthorName: songData.metadata.levelAuthorName,
+							hash: rankedScores[i].leaderboard.songHash,
+							levelid: 'custom_level_' + rankedScores[i].leaderboard.songHash,
+							difficulties: [
+								{
+									characteristic: 'Standard',
+									name: rankedScores[i].leaderboard.difficulty.difficultyRaw.split('_')[1]
+								}
+							]
+						};
+						playlistData.songs.push(song);
+					}
+				}
+
+
+				const buffer = Buffer.from(JSON.stringify(playlistData));
+				new MessageAttachment(buffer, playlistFileName);
+				await interaction.editReply({ content: messageString, files: [new MessageAttachment(buffer, playlistFileName)] });
+			} else {
+				await interaction.editReply(messageString);
+			} */
+			await interaction.editReply(messageString);
+		}
+	}
+	);
 }
+
 
 client.login(process.env.DISCORD_TOKEN);

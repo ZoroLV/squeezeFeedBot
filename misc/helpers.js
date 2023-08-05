@@ -198,6 +198,13 @@ const calculatePercentage = (score, maxScore) => {
 const getPlayerInfo = async (playerID) => {
     const response = await fetch(`https://scoresaber.com/api/player/${playerID}/full`);
     const playerData = await response.json();
+
+    // Handle error
+    if (playerData.errorMessage) {
+        console.error(playerData.errorMessage);
+        return null;
+    }
+    
     return playerData;
 }
 
@@ -241,6 +248,36 @@ const getRecentScores = async (playerId) => {
     return data
 }
 
+const getTopScores = async (playerId, page) => {
+    const url = `https://scoresaber.com/api/player/${playerId}/scores?sort=top&page=${page}`
+    const response = await fetch(url)
+    const data = await response.json()
+    return data
+}
+
+const getAllRankedScores = async (playerId) => {
+    let page = 1
+    // Iterate through all pages until an unranked score is found then stop and return the list
+
+    let allScores = []
+    let hasUnranked = false
+    while (!hasUnranked) {
+        const url = `https://scoresaber.com/api/player/${playerId}/scores?sort=top&page=${page}`
+        const response = await fetch(url)
+        const data = await response.json()
+        const scores = data["playerScores"]
+        for (const score of scores) {
+            if (score.score.pp === 0) {
+                hasUnranked = true
+                break
+            }
+            allScores.push(score)
+        }
+        page += 1
+    }
+    return allScores
+}
+
 // Check if the pp is higher or equal than the last score's pp on the page
 const isTopPlay = async (playerId, pp) => {
     const url = `https://scoresaber.com/api/player/${playerId}/scores?sort=top&page=10`
@@ -249,6 +286,15 @@ const isTopPlay = async (playerId, pp) => {
     const lastScore = data["playerScores"].slice(-1)[0]
     const lastScorePP = lastScore.score.pp
     return pp >= lastScorePP
+}
+
+// Get total amount of ranked maps for a given star rating
+const getTotalRankedMaps = async (star) => {
+    const maxStar = star + 1
+    const url = `https://scoresaber.com/api/leaderboards?ranked=true&minStar=${star}&maxStar=${maxStar}&category=3&withMetadata=true`
+    const response = await fetch(url)
+    const data = await response.json()
+    return data["metadata"]["total"]
 }
 
 exports.isTopPlay = isTopPlay
@@ -263,3 +309,6 @@ exports.getPlayerInfo = getPlayerInfo
 exports.getScoresaberLeaderboardData = getScoresaberLeaderboardData
 exports.insertUser = insertUser
 exports.getPlayerInfoDB = getPlayerInfoDB
+exports.getTopScores = getTopScores
+exports.getAllRankedScores = getAllRankedScores
+exports.getTotalRankedMaps = getTotalRankedMaps
