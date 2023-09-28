@@ -1,38 +1,7 @@
 const fetch = require('node-fetch');
 const helpers = require('../misc/helpers');
 const { Client } = require('pg');
-const db = require('../index');
 
-// Function inserts player's data, check if player id exists in database, if so update, if not insert
-function insertUser(id, totalPP, rank, gainPP, callback) {
-    const sql = `INSERT INTO users (id, totalPP, rank, gainPP) VALUES (?, ?, ?, ?)`;
-
-    db.run(sql, [id, totalPP, rank, gainPP], function(err) {
-        if (err) {
-            console.error(err.message);
-            if (callback) {
-                callback(err);
-            }
-        } else {
-            console.log(`User with ID ${id} inserted successfully!`);
-            if (callback) {
-                callback(null);
-            }
-        }
-    });
-}
-
-async function removeUser(id) {
-    return new Promise((resolve, reject) => {
-        db.run("DELETE FROM users WHERE id = ?", [id], (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve();
-            }
-        });
-    });
-}
 
 const getPlayerInfoDB = async (id) => {
     const con = new Client({
@@ -334,8 +303,6 @@ exports.getMaxScore = getMaxScore
 exports.calculatePercentage = calculatePercentage
 exports.getPlayerInfo = getPlayerInfo
 exports.getScoresaberLeaderboardData = getScoresaberLeaderboardData
-exports.insertUser = insertUser
-exports.removeUser = removeUser
 exports.getPlayerInfoDB = getPlayerInfoDB
 exports.getTopScores = getTopScores
 exports.getAllRankedScores = getAllRankedScores

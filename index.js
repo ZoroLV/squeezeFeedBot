@@ -6,25 +6,24 @@ const helpers = require('./misc/helpers');
 const WebSocket = require('ws');
 const cron = require('node-cron');
 const { kMaxLength } = require('node:buffer');
-
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE, (err) => {
-	if (err) {
-		console.error(err.message);
-	}
-	console.log('Connected to the users database.');
-});
-
 
 // Create userIDs variable
 let userIDs = [];
-db.all('SELECT id FROM users', (err, rows) => {
-	if (err) {
-		console.error(err.message);
-	}
-	rows.forEach((row) => {
-		userIDs.push(row.id);
-	});
+let db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE, (err) => {
+    if (err) {
+        console.error(err.message);
+    }
+    console.log('Connected to the users database.');
+});
+
+db.all("SELECT id FROM users", [], (err, rows) => {
+    if (err) {
+        throw err;
+    }
+    rows.forEach((row) => {
+        userIDs.push(row.id);
+    });
 });
 
 const testDiscordID = "1106488570803404852";
@@ -214,37 +213,44 @@ function connect() {
 	client.on('interactionCreate', async interaction => {
 		if (!interaction.isCommand()) return;
 
-        // insertUser command
-        if (interaction.commandName === 'insertUser') {
+        if (interaction.commandName === 'insertuser') {
             let id = interaction.options.getString('id');
             let info = await helpers.getPlayerInfo(id);
-    
+        
             if (info === null) {
                 await interaction.reply('Invalid ID!');
                 return;
             }
-    
+        
             // Check if the user is already in the database
             if (userIDs.includes(id)) {
                 await interaction.reply('User already exists in the database!');
                 return;
             }
-    
+        
             try {
                 // Insert the user
-                await helpers.insertUser(id, info.pp, info.rank, info.pp);
-                userIDs.push(id);
-                await interaction.reply(`Successfully inserted ${info.name} into the database!`);
+                const sql = `INSERT INTO users (id, totalPP, rank, gainPP) VALUES (?, ?, ?, ?)`;
+                db.run(sql, [id, info.pp, info.rank, info.pp], function(err) {
+                    if (err) {
+                        console.error("Error inserting user:", err);
+                        throw err; // throwing the error so that it can be caught in the catch block
+                    } else {
+                        console.log(`User with ID ${id} inserted successfully!`);
+                        userIDs.push(id);
+                        interaction.reply(`Successfully inserted ${info.name} into the database!`);
+                    }
+                });
             } catch (error) {
                 console.error("Error inserting user:", error);
                 await interaction.reply('An error occurred while inserting the user into the database. Please try again later.');
             }
-        }
+        }        
         
         // removeUser command
-        if (interaction.commandName === 'removeUser') {
+        if (interaction.commandName === 'removeuser') {
             let id = interaction.options.getString('id');
-
+        
             // Restricted IDs that cannot be removed
             const restrictedIDs = ["76561198126686400", "76561197999207881", "76561198048499373", "76561198071688400"];
             
@@ -254,26 +260,23 @@ function connect() {
             }
             
             // Check if the user is in the database
-            let bUserExists = false;
-            for (let i = 0; i < userIDs.length; i++) {
-                if (userIDs[i] === id) {
-                    bUserExists = true;
-                    break;
-                }
-            }
-
-            if (!bUserExists) {
+            if (!userIDs.includes(id)) {
                 await interaction.reply('User does not exist in the database!');
                 return;
             }
-
+        
             // Remove the user
-            helpers.removeUser(id);
-            userIDs = userIDs.filter(e => e !== id);
-            await interaction.reply(`Successfully removed ${id} from the database!`);
+            db.run("DELETE FROM users WHERE id = ?", [id], async (err) => {
+                if (err) {
+                    console.error("Error removing user:", err);
+                    await interaction.reply('An error occurred while removing the user from the database. Please try again later.');
+                } else {
+                    userIDs = userIDs.filter(e => e !== id);
+                    await interaction.reply(`Successfully removed ${id} from the database!`);
+                }
+            });
         }
         
-
 		if (interaction.commandName === 'fc') {
 			let star = interaction.options.getInteger('star');
 			let id = interaction.options.getString('id');
@@ -379,4 +382,6 @@ for (const eventName of eventNames) {
     console.log(`${eventName}: ${client.listenerCount(eventName)}`);
 }
 
-module.exports = db;
+module.exports = {
+    db: db
+}
