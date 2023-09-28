@@ -32,12 +32,36 @@ const commands = [
                 type: 3,
                 required: true,
             },
-            /*{
+            {
                 name: 'playlist',
                 description: 'Whether to make a playlist or not',
                 type: 5,
                 required: false,
-            },*/
+            },
+        ],
+    },
+    {
+        name: 'insertuser',
+        description: 'Inserts a user to the squeezeFeed!',
+        options: [
+            {
+                name: 'id',
+                description: 'Scoresaber id of the user',
+                type: 3,
+                required: true,
+            },
+        ],
+    },
+    {
+        name: 'removeuser',
+        description: 'Removes a user from the squeezeFeed!',
+        options: [
+            {
+                name: 'id',
+                description: 'Scoresaber id of the user',
+                type: 3,
+                required: true,
+            },
         ],
     },
 ];

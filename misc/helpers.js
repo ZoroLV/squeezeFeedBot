@@ -1,33 +1,37 @@
 const fetch = require('node-fetch');
-const helpers = require('../misc/helpers')
-const { Client } = require('pg')
-
+const helpers = require('../misc/helpers');
+const { Client } = require('pg');
+const db = require('../index');
 
 // Function inserts player's data, check if player id exists in database, if so update, if not insert
-const insertUser = async (id, name, pp) => {
-    const con = new Client({
-        host: process.env.PGHOST,
-        user: process.env.PGUSER,
-        database: process.env.PGDATABASE,
-        password: process.env.PGPASSWORD,
-        port: process.env.PGPORT,
-    });
-    try {
-        await con.connect();           // gets connection
-        const res = await con.query(`SELECT * FROM player_info WHERE id = '${id}'`);
-        if (res.rows.length > 0) {
-            await con.query(`UPDATE player_info SET name = '${name}', pp = ${pp} WHERE id = '${id}'`);
-            return true;
+function insertUser(id, totalPP, rank, gainPP, callback) {
+    const sql = `INSERT INTO users (id, totalPP, rank, gainPP) VALUES (?, ?, ?, ?)`;
+
+    db.run(sql, [id, totalPP, rank, gainPP], function(err) {
+        if (err) {
+            console.error(err.message);
+            if (callback) {
+                callback(err);
+            }
         } else {
-            await con.query(`INSERT INTO player_info (id, name, pp) VALUES ('${id}', '${name}', ${pp})`);
-            return true;
+            console.log(`User with ID ${id} inserted successfully!`);
+            if (callback) {
+                callback(null);
+            }
         }
-    } catch (err) {
-        console.log(err.stack);
-        return false;
-    } finally {
-        await con.end();
-    }
+    });
+}
+
+async function removeUser(id) {
+    return new Promise((resolve, reject) => {
+        db.run("DELETE FROM users WHERE id = ?", [id], (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
 }
 
 const getPlayerInfoDB = async (id) => {
@@ -297,6 +301,29 @@ const getTotalRankedMaps = async (star) => {
     return data["metadata"]["total"]
 }
 
+// Get all of the ranked maps data by star rating, 14 items per page so iterate through all pages until we find an empty array of leaderboards
+const getRankedMapsDatabyStar = async (star) => {
+    const maxStar = star + 1
+    let page = 1
+    let allMaps = []
+    let hasEmpty = false
+    while (!hasEmpty) {
+        const url = `https://scoresaber.com/api/leaderboards?ranked=true&minStar=${star}&maxStar=${maxStar}&category=3&withMetadata=true&page=${page}`
+        const response = await fetch(url)
+        const data = await response.json()
+        const leaderboards = data["leaderboards"]
+        if (leaderboards.length === 0) {
+            hasEmpty = true
+            break
+        }
+        for (const leaderboard of leaderboards) {
+            allMaps.push(leaderboard)
+        }
+        page += 1
+    }
+    return allMaps
+}
+
 exports.isTopPlay = isTopPlay
 exports.getTop10PlayerIds = getTop10PlayerIds
 exports.getRecentScores = getRecentScores
@@ -308,7 +335,9 @@ exports.calculatePercentage = calculatePercentage
 exports.getPlayerInfo = getPlayerInfo
 exports.getScoresaberLeaderboardData = getScoresaberLeaderboardData
 exports.insertUser = insertUser
+exports.removeUser = removeUser
 exports.getPlayerInfoDB = getPlayerInfoDB
 exports.getTopScores = getTopScores
 exports.getAllRankedScores = getAllRankedScores
 exports.getTotalRankedMaps = getTotalRankedMaps
+exports.getRankedMapsDatabyStar = getRankedMapsDatabyStar
