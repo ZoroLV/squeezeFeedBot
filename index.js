@@ -183,7 +183,7 @@ function connect() {
         const percentage = helpers.calculatePercentage(scoreData.modifiedScore, songData.maxScore);
 
 		if (topPlay) {
-            console.log("New top play");
+            console.log("NEW TOP PLAY!");
 
             // pp Gain embed
             const embed = new MessageEmbed()
